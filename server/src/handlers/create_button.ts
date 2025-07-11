@@ -1,13 +1,26 @@
 
+import { db } from '../db';
+import { buttonsTable } from '../db/schema';
 import { type Button } from '../schema';
 
 export const createButton = async (): Promise<Button> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating the default red button with no text.
-    return Promise.resolve({
-        id: 1,
+  try {
+    // Insert default red button with no text
+    const result = await db.insert(buttonsTable)
+      .values({
         color: 'red',
-        text: null, // No text as specified
-        created_at: new Date()
-    } as Button);
+        text: null
+      })
+      .returning()
+      .execute();
+
+    const button = result[0];
+    return {
+      ...button,
+      text: button.text // Already nullable, no conversion needed
+    };
+  } catch (error) {
+    console.error('Button creation failed:', error);
+    throw error;
+  }
 };
